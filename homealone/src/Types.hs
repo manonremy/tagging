@@ -83,7 +83,7 @@ instance FromJSON HomeAloneResponse
 data ClipProperties = ClipProperties
   { _cpCharacterName :: CharacterName
   , _cpHeadDir       :: HeadInfo
-  , _cpInteracting   :: Interacting
+  , _cpEmotion       :: Emotion
   , _cpPain          :: Maybe Bool
   , _cpMentalizing   :: Maybe Bool
   } deriving (Eq, Ord, Show, Generic)
@@ -116,9 +116,20 @@ data HeadInfo = HDLeft | HDFront | HDRight
               | HDBack | HDBody  | HDOffscreen
   deriving (Eq, Ord, Enum, Show, Read, Generic)
 
-data Interacting = InteractNone | InteractPos
-                 | InteractNeg | InteractNeut
-  deriving (Eq, Ord, Enum, Show, Read, Generic, ToJSON, FromJSON)
+--data Interacting = InteractNone | InteractPos
+--                 | InteractNeg | InteractNeut
+--  deriving (Eq, Ord, Enum, Show, Read, Generic, ToJSON, FromJSON)
+data Emotion = EmotionPos | EmotionNeg | EmotionNeut
+  deriving (Eq, Ord, Enum, Show, Read, Generic)
+
+instance ToJSON Emotion where
+  toJSON = genericToJSON defaultOptions {
+    fieldLabelModifier = map toLower}
+
+instance FromJSON Emotion where
+  parseJSON = genericParseJSON defaultOptions {
+  fieldLabelModifier = map toLower}
+
 
 data GoodBadGuy = BadGuy | NeutralGuy | GoodGuy
   deriving (Eq, Ord, Enum, Show, Read, Generic)
