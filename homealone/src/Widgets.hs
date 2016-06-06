@@ -260,9 +260,9 @@ clipPropsWidget characterNames selName resetEvents = mdo
            --                  ,(InteractNeg,  "bad")
              --                ,(InteractNeut, "Neutral")])
      dynEmotion <- bgroup "Emotion"
-		    (constDyn [(EmotionPos, "good")
-			       ,(EmotionNeg, "bad")
-			       ,(EmotionNeut, "Neutral")])
+                     (constDyn [(EmotionPos, "good")
+                               ,(EmotionNeg, "bad")
+                               ,(EmotionNeut, "Neutral")])
      dynPain <- bgroup "In Pain"
                    (constDyn [(False, "No"), (True, "Yes")])
      dynMentalizing <- bgroup "Mentalizing"
