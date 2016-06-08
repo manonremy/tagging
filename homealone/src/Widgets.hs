@@ -260,9 +260,13 @@ clipPropsWidget characterNames selName resetEvents = mdo
            --                  ,(InteractNeg,  "bad")
              --                ,(InteractNeut, "Neutral")])
      dynEmotion <- bgroup "Emotion"
-                     (constDyn [(EmotionPos, "good")
-                               ,(EmotionNeg, "bad")
+                     (constDyn [(EmotionPos, "Positive")
+                               ,(EmotionNeg, "Negative")
                                ,(EmotionNeut, "Neutral")])
+     dynEmotionIntensity <- bgroup "Emotion Intensity"
+                    (constDyn [(EmotionIntensityStrong, "Strong")
+                              ,(EmotionIntensityWeak, "Weak")
+                              ,(EmotionIntensityNeutral, "Neutral")])
      dynPain <- bgroup "In Pain"
                    (constDyn [(False, "No"), (True, "Yes")])
      dynMentalizing <- bgroup "Mentalizing"
@@ -270,6 +274,7 @@ clipPropsWidget characterNames selName resetEvents = mdo
      clipProps <- $(qDyn [| ClipProperties c
                             <$>      $(unqDyn [| dynHeadDir     |])
                             <*>      $(unqDyn [| dynEmotion |])
+                            <*>      $(unqDyn [| dynEmotionIntensity |])
                             <*> pure $(unqDyn [| dynPain        |])
                             <*> pure $(unqDyn [| dynMentalizing |])
                          |])

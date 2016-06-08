@@ -84,6 +84,7 @@ data ClipProperties = ClipProperties
   { _cpCharacterName :: CharacterName
   , _cpHeadDir       :: HeadInfo
   , _cpEmotion       :: Emotion
+  , _cpEmotionIntensity :: EmotionIntensity
   , _cpPain          :: Maybe Bool
   , _cpMentalizing   :: Maybe Bool
   } deriving (Eq, Ord, Show, Generic)
@@ -130,6 +131,18 @@ instance FromJSON Emotion where
   parseJSON = genericParseJSON defaultOptions {
   fieldLabelModifier = map toLower}
 
+data EmotionIntensity = EmotionIntensityWeak 
+                      | EmotionIntensityStrong 
+                      | EmotionIntensityNeutral
+  deriving (Eq, Ord, Enum, Show, Read, Generic)
+
+instance ToJSON EmotionIntensity where
+  toJSON = genericToJSON defaultOptions {
+     fieldLabelModifier = map toLower}
+
+instance FromJSON EmotionIntensity where
+  parseJSON = genericParseJSON defaultOptions {
+  fieldLabelModifier = map toLower}
 
 data GoodBadGuy = BadGuy | NeutralGuy | GoodGuy
   deriving (Eq, Ord, Enum, Show, Read, Generic)
