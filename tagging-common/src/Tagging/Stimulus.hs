@@ -7,7 +7,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -229,3 +228,11 @@ sampleRequest = StimulusRequest 1
 
 instance ToSample StimSeqAnswer where
   toSamples _ = singleSample (StimSeqAnswer (toJSON True) (intToKey 1) 10)
+
+data SubjectCanSelfAssign = SubjectCanSelfAssign
+  { scsaSequence :: G.DefaultKey StimulusSequence
+  } deriving (Eq, Show, Generic)
+
+G.mkPersist ghCodeGen [G.groundhog|
+  - entity: SubjectCanSelfAssign
+|]
