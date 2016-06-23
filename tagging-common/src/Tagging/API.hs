@@ -4,6 +4,7 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 module Tagging.API where
 
@@ -18,15 +19,10 @@ import           GHC.Generics
 import           GHC.Int
 import           Servant.API
 import           Servant.API.Capture
--- import           Servant.Docs
 import           Tagging.User
 import           Tagging.Stimulus
 import           Tagging.Response
--- import           Server.Application
--- import           Server.Crud
--- import           Server.Resources
--- import           Server.Session
--- import           Server.Subject
+
 
 ------------------------------------------------------------------------------
 type TaggingAPI =
@@ -35,9 +31,13 @@ type TaggingAPI =
   :<|> ResourcesAPI  -- API for talking to the database directly
   :<|> ResearcherAPI -- API administering experiments
 
+
 ------------------------------------------------------------------------------
-type ResearcherAPI = "assignsequence" :> Capture "userid"   Int64
-                                      :> Capture "sequence" Int64
+type ResearcherAPI = "assignsequence" :> QueryParam "userid"   Int64
+                                      :> QueryParam "sequence" Int64
+                                      :> QueryParam "rangeStart" Int64
+                                      :> QueryParam "rangeEnd" Int64
+                                      :> QueryParam "finishURL" T.Text
                                       :> Put '[JSON] ()
 
                 :<|> "loadSequence" :> ReqBody '[JSON] (StimulusSequence,
@@ -73,31 +73,33 @@ apiProxy = Proxy
 type SubjectAPI = "currentstim"       :> Get '[JSON] StimSeqItem
              :<|> "currentsequence"   :> Get '[JSON] StimulusSequence
              :<|> "currentassignment" :> Get '[JSON] Assignment
-             :<|> "fullposinfo"       :> Get '[JSON] (Maybe
-                                         (Assignment,
-                                          StimulusSequence,
-                                          StimSeqItem))
+             :<|> "fullposinfo"       :> QueryParam "indexRequest" Int -- TODO seems like single-assignment per (user,expt) assumption is here
+                                      :> Get '[JSON] (Maybe FullPosInfo)
              :<|> "progress"          :> Get '[JSON] Progress
              :<|> "response"          :> QueryFlag "advance" :> ReqBody '[JSON] ResponsePayload :> Post '[JSON] ()
              :<|> "answerkey"         :> QueryParam "experiment" Int
                                       :> Get '[JSON] [StimSeqAnswer]
 
+data FullPosInfo = FPI { fpiAssignment :: Assignment
+                       , fpiStimulusSequence :: StimulusSequence
+                       , fpiStimSeqItem :: Maybe StimSeqItem
+                       } deriving (Eq, Show, Generic, A.ToJSON, A.FromJSON)
+
 ------------------------------------------------------------------------------
 type SessionAPI =
---       "login" :> ReqBody '[FormUrlEncoded, JSON] LoginInfo
---               :> Raw AppHandler (AppHandler ())
 
    "currentuser" :> Get '[JSON] TaggingUser
 
-   :<|> "turk"  :> QueryParam "userid" Int :> QueryParam "experimentid" Int :> QueryParam "extradata" String :> Get '[JSON] String
-   -- :<|> "turk" :> Capture "userid" Int64  :> Capture "experiment" Int64
-   --             :> Capture "extra-data" String :> Get '[JSON] ()
-
---  :<|> "newuser" :> ReqBody '[FormUrlEncoded, JSON] RegisterInfo
---                 :> Post '[JSON] ()
-
---  :<|> "logout" :> Get '[JSON] ()
-
+   :<|> "turk"  :> QueryParam "assignmentId" T.Text
+                :> QueryParam "hitId" T.Text
+                :> QueryParam "workerId" T.Text
+                :> QueryParam "turkSubmitTo" T.Text
+                :> QueryParam "redirectURL" T.Text
+                :> QueryParam "taggingExperiment" Int64
+                :> QueryParam "rangeStart" Int
+                :> QueryParam "rangeEnd" Int
+                :> QueryParam "experimentData" T.Text
+                :> Raw
 
 
 data LoginInfo = LoginInfo {
