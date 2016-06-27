@@ -192,6 +192,7 @@ handleSubmitResponse advanceStim t = do
 runFinishedURL :: T.Text -> IO ()
 runFinishedURL url = do
 
+  print $ URI.parseURI URI.strictURIParserOptions (T.encodeUtf8 url)
   let (Right pieces) = URI.parseURI URI.strictURIParserOptions (T.encodeUtf8 url)
       pairs          = URI.queryPairs (URI.uriQuery pieces)
   print $ "POSTing to: " <> T.unpack url -- TODO this is not an error. How to log non-errors?

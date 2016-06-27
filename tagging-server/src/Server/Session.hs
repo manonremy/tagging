@@ -127,7 +127,8 @@ handleTurk (Just assignmentId) (Just hitId) (Just workerId)
 
   let fI = fromIntegral
       -- ie: turkSubmitTo == https://www.mturk.com/
-      finishURL = turkSubmitTo <> "mturk/externalSubmit?assignmentId=" <> assignmentId
+      finishURL = turkSubmitTo <> "/mturk/externalSubmit?assignmentId=" <> assignmentId
+  liftIO $ print $ "finishURL: " <> finishURL
   turkLogin workerId taggingExptNum (fI <$> rangeStart) (fI <$> rangeEnd) finishURL
   I.renderWithSplices "_turklink" ("turklink" ## I.textSplice (redirectUrl))
 handleTurk _ _ _ _ _ _ _ _ _ = do

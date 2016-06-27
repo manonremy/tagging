@@ -49,7 +49,7 @@ getCurrentTaggingUser = do
   case readMay . T.unpack . unUid =<< userId cu of
     Nothing         -> ExceptT (return $ Left "Could not read userId")
     Just (i :: Int) ->
-      noteT "Zero matches in lookup" $ MaybeT $ fmap listToMaybe $ runGH $
+      noteT ("Zero matches in lookup for id " ++ show i) $ MaybeT $ fmap listToMaybe $ runGH $
       select (TuIdField ==. (fromIntegral i :: Int64))
 
 ------------------------------------------------------------------------------
