@@ -9,7 +9,7 @@
 module Server.Session where
 
 import           Control.Error
-import           Control.Monad (mzero)
+import           Control.Monad (mzero, when)
 import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import           Control.Monad.IO.Class (liftIO)
@@ -130,7 +130,9 @@ handleTurk (Just assignmentId) (Just hitId) (Just workerId)
       finishURL = turkSubmitTo <> "/mturk/externalSubmit?assignmentId=" <> assignmentId
   liftIO $ print $ "finishURL: " <> finishURL
   turkLogin workerId taggingExptNum (fI <$> rangeStart) (fI <$> rangeEnd) finishURL
-  I.renderWithSplices "_turklink" ("turklink" ## I.textSplice (redirectUrl))
+  I.renderWithSplices "_turklink" $ do
+    "turklink"  ## I.textSplice redirectUrl
+    "finishurl" ## I.textSplice finishURL
 handleTurk _ _ _ _ _ _ _ _ _ = do
   ps <- getParams
   writeText ("Param problem. Params: " <> T.pack (show ps))
@@ -153,21 +155,24 @@ turkLogin workerId taggingExptNum startInd endInd finishURL = do
     uExist <- usernameExists workerId
     bool (createTurker pw) (loginTurker workerId pw) uExist
 
-  -- assignExperimentToUser userId taggingExptNum
+  -- TODO: This is copy-pasted from Researcher.hs
+  --       Factor out a function like `defaultSequenceBounds`
+  let fI = fromIntegral
+      exptKey = Utils.integralToKey taggingExptNum :: Key StimulusSequence BackendSpecific
+      userKey = Utils.integralToKey userId :: Key TaggingUser BackendSpecific
+  seqInds <- runGH $ map ssiIndex <$>
+    select (SsiStimulusSequenceField ==. exptKey)
+  let (indMin, indMax) = (minimum seqInds, maximum seqInds)
 
-  assignUserSeqStart (Just userId) (Just taggingExptNum) startInd endInd (Just finishURL)
+  nAsgn <- runGH $ count (AUserField     ==. userKey                  &&.
+                          ASequenceField ==. exptKey                  &&.
+                          AStartField    ==. maybe indMin fI startInd &&.
+                          AEndField      ==. maybe indMax fI endInd)
+
+  when (nAsgn == 0) $ assignUserSeqStart
+    (Just userId) (Just taggingExptNum) startInd endInd (Just finishURL)
 
   where
-
-    -- assignExperimentToUser :: Int64 -> Int64 -> Handler App App ()
-    -- assignExperimentToUser userid expid = do
-    --   runGH $ insert (Assignment (Utils.intToKey $ fromIntegral userid)
-    --                              (Utils.intToKey $ fromIntegral expid)
-    --                              (fst iRange)
-    --                              (fst iRange)
-    --                              (snd iRange))
-    --   -- TODO how to assign anything but index 1?
-    --   return ()
 
     loginTurker uId pw = do
       au <- loginByUsername workerId pw True
