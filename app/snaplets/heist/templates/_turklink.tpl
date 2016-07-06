@@ -114,11 +114,21 @@
       }
 
       function handleProgress(p){
-      var progressNumber = $('#progressNumber');
-      var submitButton = $('#submitButton');
-      progressNumber.text( progressText(p) );
+        var nDone = p['_progressNResponses'];
+        var nTotal = p['_progressNTotal'];
+        var progressNumber = $('#progressNumber');
+        var submitButton = $('#submitButton');
+        progressNumber.text( progressText(p) );
 
+        if (nDone >= nTotal) {
+          submitButton.disabled = false;
+          submitButton.hidden = false;
+        } else {
+          submitButton.disabled = true;
+          submitButton.hidden = true;
+        }
       }
+
     </script>
 
   </head>
@@ -155,13 +165,11 @@
           <div class="button" onclick="checkprogress()">
             <span>Check progress</span>
           </div>
-          <div id="submission-form" style="opacity:0.5">
-            <form action="${finishurl}&foo=bar" method="post">
-              <input type="submit" value="Submit" class="button"/>
+          <div id="submission-form" >
+            <form action="${finishurl}" method="post">
+              <input type="submit" id="submitButton" value="Submit" class="button" hidden disabled/>
             </form>
           </div>
-
-
         </div>
 
       </div>
