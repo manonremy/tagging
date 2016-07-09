@@ -85,8 +85,6 @@ data ClipProperties = ClipProperties
   , _cpHeadDir       :: HeadInfo
   , _cpEmotion       :: Emotion
   , _cpEmotionIntensity :: EmotionIntensity
-  , _cpPain          :: Maybe Bool
-  , _cpMentalizing   :: Maybe Bool
   } deriving (Eq, Ord, Show, Generic)
 
 instance ToJSON   ClipProperties where

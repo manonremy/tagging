@@ -83,6 +83,7 @@ html, body {
   padding: 5px;
   // border: 1px solid gray;
   border-radius: 3px;
+  z-index: 1px;
 }
 
 .selections-container {
@@ -107,6 +108,7 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-around;
+    z-index: 20;
 }
 
 .success-box {
@@ -121,6 +123,7 @@ html, body {
   order: 2;
   min-height: 70px;
   width: 100%;
+  z-index: 10;
 }
 
 .choice-bank-widget{
@@ -151,6 +154,10 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-around;
+}
+
+.stable-properties-widget{
+  display: none;
 }
 
 .stable-props-div table td, .clip-properties-widget table td {
@@ -325,15 +332,23 @@ video {
 
 /* Admin dialog */
 dialog {
-    background-color: white;
-    border-radius:3px;
-    // border: 2px solid black;
-    max-width: 80%;
-    z-index: 200;
+  background-color: white;
+  border-radius:0px;
+  max-width: 80%;
+  border: 0px;
+  border-top: solid 10px #FFC65F;
+  box-shadow: 0px 5px 20px rgba(0,0,0,0.25);
+  font-size: 12pt;
 }
+
 dialog .inp-group {
     margin: 10px;
 }
+
+dialog button {
+  min-height: 30px;
+}
+
 .dynlink{
     white-space: no-wrap;
     overflow-x: scroll;
@@ -344,4 +359,27 @@ dialog .inp-group {
     // border: 2px solid black;
     padding: 20px;
     font-size: 12pt;
+}
+
+/* Instructions dialog */
+
+.dialog-back{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 20;
+}
+
+dialog {
+  margin: 100px auto;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 50px;
 }

@@ -267,7 +267,7 @@ clipPropsWidget characterNames selName resetEvents = mdo
     singleCharacterProps <- forDyn nameDyn $ \selName ->
       bool ("style" =: "display:none;") mempty (Just c == selName)
     elDynAttr "div" singleCharacterProps $ el "table" $ do
-     dynHeadDir <- bgroup "Head"
+     dynHeadDir <- bgroup "Head Direction"
                    (constDyn [(HDLeft,  "Left")  ,(HDFront,     "Front")
                              ,(HDRight, "Right") ,(HDBack,      "Back")
                              ,(HDBody,  "Body")  ,(HDOffscreen, "Hidden")])
@@ -276,7 +276,7 @@ clipPropsWidget characterNames selName resetEvents = mdo
          --                    ,(InteractPos,  "good")
            --                  ,(InteractNeg,  "bad")
              --                ,(InteractNeut, "Neutral")])
-     dynEmotion <- bgroup "Emotion"
+     dynEmotion <- bgroup "Emotion Valence"
                      (constDyn [(EmotionPos, "Positive")
                                ,(EmotionNeg, "Negative")
                                ,(EmotionNeut, "Neutral")])
@@ -284,16 +284,10 @@ clipPropsWidget characterNames selName resetEvents = mdo
                     (constDyn [(EmotionIntensityStrong, "Strong")
                               ,(EmotionIntensityWeak, "Weak")
                               ,(EmotionIntensityNeutral, "Neutral")])
-     dynPain <- bgroup "In Pain"
-                   (constDyn [(False, "No"), (True, "Yes")])
-     dynMentalizing <- bgroup "Mentalizing"
-                       (constDyn [(False, "No"), (True, "Yes")])
      clipProps <- $(qDyn [| ClipProperties c
                             <$>      $(unqDyn [| dynHeadDir     |])
                             <*>      $(unqDyn [| dynEmotion |])
                             <*>      $(unqDyn [| dynEmotionIntensity |])
-                            <*> pure $(unqDyn [| dynPain        |])
-                            <*> pure $(unqDyn [| dynMentalizing |])
                          |])
      return (c, clipProps)
 
@@ -438,3 +432,34 @@ nameToMime fn = case extension fn of
 -- | Utility function for pulling one (arbitrary) event out of a Map of events
 oneFromMap :: Reflex t => Event t (Map.Map k a) -> Event t a
 oneFromMap = fmapMaybe (listToMaybe . Map.elems)
+
+instructionWidget :: MonadWidget t m => m () 
+instructionWidget = mdo
+  vis <- holdDyn True ( False <$ b )  
+  backAttrs <- forDyn vis $ bool ("style" =: "display:none") ("class" =: "dialog-back") 
+  dialogattrs <- forDyn vis $ bool mempty ("open" =: "true")
+  b <- elDynAttr "div" backAttrs $ do
+    elDynAttr "dialog" dialogattrs $ do  
+      el "p" $ text $ concat ["Please watch the following clips and select each "
+                             ,"character in the scene (even if they are not "
+                             ,"visible on screen) from the bank on the right. "
+                             ,"For each character, please indicate:"]
+      el "ul" $ do
+        el "li" $ text $ concat ["Head direction - front of head (both eyes are "
+                                ,"visible), left/right (one eye is visible), "
+                                ,"back (no eyes are visible), body (body is "
+                                ,"visible, but cannot clearly see head), hidden ("
+                                ,"if the character is off screen, but present in"
+                                ," the scene)"]
+        el "li" $ text $ concat ["Emotional valence - if each character is experiencing "
+                                ,"a positive, negative or neutral emotional state."]
+        el "li" $ text $ concat ["Emotional intensity - how intense each character's "
+                                ,"emotion is (strong, weak, or neutral)"]
+        el "li" $ text $ concat ["When you have labeled all the characters in a"
+                                ," scene, click \"send\" to move the next scene."]
+      el "p" $ text $ concat ["Remember to go back to Mechanical Turk and click "
+                             ,"\"Check Progress\" and then \"Submit\" when you "
+                             ,"finish."]
+      button "ok" 
+
+  return () 

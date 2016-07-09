@@ -38,6 +38,7 @@ main = mainWidget $ do
   isAdmin <- liftIO $ urlIsAdmin loc
   when isAdmin adminWidget
   contentWidget
+  instructionWidget
 
 -------------------------------------------------------------------------------
 contentWidget :: MonadWidget t m => m ()
