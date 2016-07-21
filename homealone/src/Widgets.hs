@@ -268,9 +268,13 @@ clipPropsWidget characterNames selName resetEvents = mdo
       bool ("style" =: "display:none;") mempty (Just c == selName)
     elDynAttr "div" singleCharacterProps $ el "table" $ do
      dynHeadDir <- bgroup "Head Direction"
-                   (constDyn [(HDLeft,  "Left")  ,(HDFront,     "Front")
-                             ,(HDRight, "Right") ,(HDBack,      "Back")
-                             ,(HDBody,  "Body")  ,(HDOffscreen, "Hidden")])
+                   (constDyn [(HDSide,      "Side Face")
+                             ,(HDFront,     "Front Face")
+                             ,(HDVoiceOnly, "Voice Only")])
+   --  dynHeadDir <- bgroup "Head Direction"
+     --              (constDyn [(HDLeft,  "Left")  ,(HDFront,     "Front")
+       --                      ,(HDRight, "Right") ,(HDBack,      "Back")
+         --                    ,(HDBody,  "Body")  ,(HDOffscreen, "Hidden")])
      --dynInteracting <- bgroup "Interacting"
        --            (constDyn [(InteractNone, "No")
          --                    ,(InteractPos,  "good")
@@ -281,9 +285,9 @@ clipPropsWidget characterNames selName resetEvents = mdo
                                ,(EmotionNeg, "Negative")
                                ,(EmotionNeut, "Neutral")])
      dynEmotionIntensity <- bgroup "Emotion Intensity"
-                    (constDyn [(EmotionIntensityStrong, "Strong")
-                              ,(EmotionIntensityWeak, "Weak")
-                              ,(EmotionIntensityNeutral, "Neutral")])
+                    (constDyn [(EmotionIntensityWeak, "Weak")
+                              ,(EmotionIntensityNeutral, "Medium")
+                              ,(EmotionIntensityStrong, "Strong")])
      clipProps <- $(qDyn [| ClipProperties c
                             <$>      $(unqDyn [| dynHeadDir     |])
                             <*>      $(unqDyn [| dynEmotion |])
@@ -349,17 +353,18 @@ selectionsWidget selChars selChar okToSend =
     (e,_) <- elDynAttr' "button" sendAttrs $ text "Send"
     return (domEvent Click e)
 
-  nOtherChars <- elAttr "div" ("class" =: "others-and-send") $ do
-    text "Others"
-    dropdown 0
-      (constDyn $ Map.fromList [((0::Int),"0"),(1,"1"),(2,"2"),(3,"3+")]) 
-      (DropdownConfig (0 <$ sendClicks) 
-                      (constDyn $ "class" =: "n-characters"))
+  -- nOtherChars <- elAttr "div" ("class" =: "others-and-send") $ do
+  --   text "Others"
+  --   dropdown 0
+  --     (constDyn $ Map.fromList [((0::Int),"0"),(1,"1"),(2,"2"),(3,"3+")]) 
+  --     (DropdownConfig (0 <$ sendClicks) 
+  --                     (constDyn $ "class" =: "n-characters"))
+  nOtherChars <- return $ constDyn (0 :: Int)
 
   return $ (SelectionWidget (fmap fst (ffilter snd clks))
                             (fmap fst (ffilter (not . snd) clks))
                             sendClicks,
-            value nOtherChars)
+            nOtherChars)
 
 
 -----------------------------------------------------------------------------
@@ -409,13 +414,16 @@ choices= ["Kevin McC" ,"Tracy McC" ,"Sondra McC" ,"Rod McC" ,"Rob McC"
          ,"Mrs. Stone" ,"Mr. Hector" ,"Mr. Duncan"
          ,"Megan McC" ,"Marv Merch" ,"Linnie McC" ,"Leslie McC" ,"Kate McC"
          ,"Jeff McC" ,"Harry Lyme" ,"Fuller McC" ,"Frank McC" ,"Cedric"
-         ,"Brooke McC" ,"Bird Lady", "Other"
+         ,"Brooke McC" ,"Bird Lady", "Other(s)"
          ]
 
 choicesMap :: Map.Map String String
 choicesMap = Map.fromList $
              map (\n -> (T.unpack n, nameToFile (T.unpack n))) choices
 
+------------------------------------------------------------------------------
+-- | We assume the profile picture for each character is their name,
+--   stripping whitespace, spaces and parentheses, with .png extension
 nameToFile :: String -> String
 nameToFile = ("http://web.mit.edu/greghale/Public/hapics/" <>)
              . (<> ".png")
@@ -440,21 +448,22 @@ instructionWidget = mdo
   dialogattrs <- forDyn vis $ bool mempty ("open" =: "true")
   b <- elDynAttr "div" backAttrs $ do
     elDynAttr "dialog" dialogattrs $ do  
-      el "p" $ text $ concat ["Please watch the following clips and select each "
-                             ,"character in the scene (even if they are not "
-                             ,"visible on screen) from the bank on the right. "
-                             ,"For each character, please indicate:"]
+      el "p" $ do
+        text $ concat ["Please watch the following clips and select each "
+                             ,"character whose "]
+        elAttr "span" ("style" =: "font-weight:bold") $ text "face or voice "
+        text $ concat ["is in the scene (even if they are not visible on screen) from "
+                             ,"the bank on the right. For each character, please "
+                             ," indicate:"]
       el "ul" $ do
         el "li" $ text $ concat ["Head direction - front of head (both eyes are "
-                                ,"visible), left/right (one eye is visible), "
-                                ,"back (no eyes are visible), body (body is "
-                                ,"visible, but cannot clearly see head), hidden ("
-                                ,"if the character is off screen, but present in"
-                                ," the scene)"]
+                                ,"visible), side (one eye is visible), "
+                                ,"voice only (if the character is off screen, but"
+                                ," present in the scene and you can hear his voice)"]
         el "li" $ text $ concat ["Emotional valence - if each character is experiencing "
                                 ,"a positive, negative or neutral emotional state."]
         el "li" $ text $ concat ["Emotional intensity - how intense each character's "
-                                ,"emotion is (strong, weak, or neutral)"]
+                                ,"emotion is (strong, medium, or weak)"]
         el "li" $ text $ concat ["When you have labeled all the characters in a"
                                 ," scene, click \"send\" to move the next scene."]
       el "p" $ text $ concat ["Remember to go back to Mechanical Turk and click "

@@ -109,13 +109,17 @@ instance FromJSON StableProperties where
   parseJSON = genericParseJSON defaultOptions {
     fieldLabelModifier = drop 3 . map toLower }
 
-data HeadInfo = HDLeft | HDFront | HDRight
-              | HDBack | HDBody  | HDOffscreen
+data HeadInfo = HDSide | HDFront | HDVoiceOnly
   deriving (Eq, Ord, Enum, Show, Read, Generic)
+
+-- data HeadInfo = HDLeft | HDFront | HDRight
+--              | HDBack | HDBody  | HDOffscreen
+--  deriving (Eq, Ord, Enum, Show, Read, Generic)
 
 --data Interacting = InteractNone | InteractPos
 --                 | InteractNeg | InteractNeut
 --  deriving (Eq, Ord, Enum, Show, Read, Generic, ToJSON, FromJSON)
+
 data Emotion = EmotionPos | EmotionNeg | EmotionNeut
   deriving (Eq, Ord, Enum, Show, Read, Generic)
 
